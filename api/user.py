@@ -122,3 +122,31 @@ class UserAPI:
     api.add_resource(_CRUD, '/')
     api.add_resource(_Security, '/authenticate')
     
+    
+    class Login(Resource):
+        def post(self):
+            data = request.get_json()
+
+            uid = data.get('uid')
+            password = data.get('password')
+
+            if not uid or not password:
+                response = {'message': 'Invalid creds'}
+                return make_response(jsonify(response), 401)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            user = User.query.filter_by(_uid=uid).first()
+
+            if user and user.is_password(password):
+                response = {
+                    'message': 'Logged in successfully',
+                    'user': {
+                        'name': user.name,  
+                        'id': user.id
+                    }
+                }
+                return make_response(jsonify(response), 200)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            response = {'message': 'Invalid id or pass'}
+            return make_response(jsonify(response), 401)
+            
+api.add_resource(Login, '/login')
